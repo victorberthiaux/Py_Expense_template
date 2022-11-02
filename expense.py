@@ -1,13 +1,14 @@
 from PyInquirer import prompt
 import csv
 
-users = []
+def new_expense(*args):
 
-with open('users.csv', newline='') as u:
-    reader = csv.reader(u)
-    users = list(reader)
+    with open('users.csv', newline='') as u:
+        reader = csv.reader(u)
+        users = list(reader)
 
-expense_questions = [
+    print(users)
+    infos = prompt([
     {
         "type":"input",
         "name":"amount",
@@ -23,15 +24,7 @@ expense_questions = [
         "name":"spender",
         "message":"New Expense - Spender: ",
         'choices': [{'name': x[0], } for x in users],
-    },
-]
-
-
-
-
-
-def new_expense(*args):
-    infos = prompt(expense_questions)
+    },])
     thespender = infos["spender"]
     who = prompt([
     {
@@ -42,8 +35,35 @@ def new_expense(*args):
     },
 ])
     f = open("expenses.csv", "a")
-    f.write(infos["amount"] + ';' + infos["label"] + ";" + infos["spender"] + ";" + str(who["for"]) + "\n")
+    f.write(infos["amount"] + ',' + infos["label"] + "," + infos["spender"] + "," + str(who["for"]) + "\n")
     f.close()
+
+    value = int(infos["amount"]) /(1 + len(who))
+    print(value)
+
+    with open('users.csv', newline='') as u:
+        reader = csv.reader(u)
+        allusers = list(reader)
+
+    for k in allusers:
+        if (k[0] in who["for"]):
+            print("HIM! + ", k[0])
+            if (k[0] != thespender):
+                k[1] = str(int(k[1]) + int(value))
+            if (k[0] == thespender):
+                k[2] = str(int(k[2]) + int(infos["amount"]) - int(value))
+    
+    print(allusers)
+
+    open('users.csv', 'w').close()
+
+    with open('users.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        for line in allusers:
+            writer.writerow(line)
+    
+
+
     print("Expense Added !")
     return True
 
